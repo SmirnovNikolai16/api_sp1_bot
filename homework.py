@@ -37,24 +37,22 @@ def send_message(message):
     return bot.send_message(chat_id=CHAT_ID, text=message)
 
 
-
 def main():
     current_timestamp = int(time.time())
-    
 
     while True:
         try:
             logging.basicConfig(
-            level=logging.DEBUG,
-            filename='bot.log', 
-            format='%(asctime)s, %(levelname)s, %(message)s, %(name)s'
+                level=logging.DEBUG,
+                filename='bot.log',
+                format='%(asctime)s, %(levelname)s, %(message)s, %(name)s'
             )
             homework = get_homeworks(current_timestamp)
             message = parse_homework_status(homework['homeworks'][0])
             logging.info('Send message')
             send_message(message)
             logging.info('Message sent')
-            time.sleep(20*60)
+            time.sleep(20 * 60)
 
         except Exception as e:
             logging.exception(f'Бот упал с ошибкой: {e}')
