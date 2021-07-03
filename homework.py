@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import time
@@ -28,7 +29,7 @@ logging.basicConfig(
 bot = telegram.Bot(token=f'{TELEGRAM_TOKEN}')
 
 
-class NegativeValueException(Exception):
+class NegativeValueException(ValueError):
     pass
 
 
@@ -48,8 +49,7 @@ def parse_homework_status(homework):
                 f'Домашняя работа вернулась с неизвестным статусом {status}'
             )
 
-        if status in HOMEWORK_STATUS:
-            verdict = HOMEWORK_STATUS[status]
+        verdict = HOMEWORK_STATUS[status]
         return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 
     except NegativeValueException as e:
@@ -60,14 +60,15 @@ def parse_homework_status(homework):
 def get_homeworks(current_timestamp):
     headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
     payload = {'from_date': current_timestamp}
+
     try:
         homework_statuses = requests.get(URL, headers=headers, params=payload)
-        try:
-            return homework_statuses.json()
-        except Exception:
-            logging.exception('Возникла ошибка при распаковке JSON')
+        return homework_statuses.json()
     except requests.exceptions.RequestException as e:
         logging.exception(f'Возникла ошибка {e} при соединении с сервером')
+        raise
+    except json.decoder.JSONDecodeError:
+        logging.exception('Возникла ошибка при распаковке JSON')
         raise
 
 
